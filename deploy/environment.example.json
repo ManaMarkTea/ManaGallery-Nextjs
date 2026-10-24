@@ -1,0 +1,12 @@
+{
+  "siteHost": "test.example.com",
+  "adminUser": "deployadmin",
+  "repository": "OWNER/REPOSITORY",
+  "nodeVersion": "24.22.1",
+  "nodeSha256": "6c172a9ab6718f7b801fb5a7bd486af2ee5e32758086a04b84fcce2aa77095e6",
+  "restoreSnapshot": null,
+  "allowEmpty": false,
+  "manageFirewall": true,
+  "localBackups": true,
+  "cloudBackups": false
+}

@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.next-dev/
+legacy/
+public/
+storage/
+test-results/
+package-lock.json
