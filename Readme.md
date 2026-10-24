@@ -1,4 +1,7 @@
-# RenderGallery
+# ManaGallery - Next.js
+
+Start with [the installation guide](../docs/getting-started.md). No migration or existing gallery is required.
+
 
 A community gallery for Bryce, Blender, DAZ Studio, Vue, Terragen and other rendering tools. The interface preserves the original Bryce5 gallery as part of one shared collection, with software and category filters.
 
@@ -40,22 +43,6 @@ Keep public and private data backed up separately from the source repository. St
 
 The repository includes fictional test fixtures and a generated SVG placeholder. They contain no imported users, artwork or real credentials. A repository-content check rejects private data and common secret formats before publication.
 
-## Importing the original archive
-
-Keep the original PHP tree and SQL export in private local directories. The importers do not publish credentials or change the original host:
-
-```sh
-python scripts/import-gallery.py /private/path/archive.sql --site /private/path/original-site
-python scripts/import-accounts.py /private/path/archive.sql
-python scripts/import-materials.py /private/path/archive.sql --site /private/path/original-site
-```
-
-The account importer reserves legacy names, preserves source activation/admin rules and verified ownership, and records join/last-visit dates when supplied. Legacy password hashes are checked privately on first successful sign-in, upgraded to scrypt and then cleared. Re-importing preserves upgraded credentials and explicit administrative overrides. Choosing the same artist name alone does not establish ownership.
-
-Imported .MAT files stay private and require membership to download. Only file transport is verified, not compatibility of every preset with Bryce. Archived .3DS model downloads also require membership and respect moderation. New material/model uploads are not implemented. The offline [GLB conversion tool](docs/model-previews.md) prepares private geometry derivatives, available to members as GLB downloads; the interactive Mana viewer remains separate.
-
-Archived hit counts are labeled unverified. New unique views count once per signed-in account across devices, or once per anonymous browser cookie, without storing IP addresses. Guests can be counted again after clearing cookies or using another browser. Signing in associates an anonymous visit with the account instead of double counting it.
-
 ## Configuration
 
 Copy `.env.example` to `.env.local` as needed. Public hosting requires HTTPS and an exact `APP_ORIGIN`. Passkeys are bound to the domain, so credentials registered on localhost do not transfer to another host.
@@ -73,7 +60,7 @@ npx playwright install chromium
 npm test
 ```
 
-Tests use fictional gallery data and an isolated database on port 3100. They exercise auth/passkeys, legacy migration, permissions, uploads/approval, metadata/software edits, moderation, member activity, materials, views and advertising controls. Real device passkey prompts still need a manual check.
+Tests use fictional gallery data and an isolated database on port 3100. They exercise auth/passkeys, permissions, uploads/approval, storage limits, views, pagination and advertising controls. Real device passkey prompts still need a manual check.
 
 ## Deploying
 

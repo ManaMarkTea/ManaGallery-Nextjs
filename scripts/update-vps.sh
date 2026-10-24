@@ -37,28 +37,16 @@ fi
 chown -R root:rendergallery /srv/rendergallery/app.next
 chmod -R g+rX,o-rwx /srv/rendergallery/app.next
 chown -R rendergallery:rendergallery /srv/rendergallery/app.next/.next/cache
-log 'Stopping the app briefly to import history and switch versions…'
+log 'Stopping the app briefly to update the schema and switch versions…'
 systemctl stop rendergallery
 trap 'systemctl start rendergallery' EXIT
-if [ -f "$stage/legacy-comments.json" ]; then
-    python3 "$stage/app/scripts/import-comments.py" "$stage/legacy-comments.json" --database /srv/rendergallery-data/gallery.sqlite
-fi
 python3 - "$stage" <<'PY'
 import json,sqlite3,sys
 from pathlib import Path
 stage=Path(sys.argv[1])
 with sqlite3.connect('/srv/rendergallery-data/gallery.sqlite') as db:
     db.executescript((stage/'app/lib/member-schema.sql').read_text())
-    dates=stage/'legacy-dates.json'
-    if dates.exists():
-        for row in json.loads(dates.read_text()):
-            if db.execute('SELECT 1 FROM legacy_accounts WHERE legacy_id=?',(row['id'],)).fetchone():
-                db.execute('INSERT INTO legacy_account_dates(legacy_id,joined,last_visit) VALUES (?,?,?) ON CONFLICT(legacy_id) DO UPDATE SET joined=excluded.joined,last_visit=excluded.last_visit',(row['id'],row['joined'],row['lastVisit']))
-    settings=stage/'private-ad-settings.json'
-    if settings.exists():
-        for key,value in json.loads(settings.read_text()).items():
-            if key in ('adsensePublisher','adsenseSlot'):
-                db.execute('INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO NOTHING',(key,value))
+
 PY
 mv /srv/rendergallery/app "/srv/rendergallery/app.before-$stamp"
 if ! mv /srv/rendergallery/app.next /srv/rendergallery/app; then

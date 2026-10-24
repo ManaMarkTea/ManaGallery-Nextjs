@@ -65,12 +65,6 @@ if [ -f "$seed/data/model-previews/catalogue.json" ]; then
     done
     cp -- "$seed/data/model-previews/catalogue.json" "$stage/data/models/previews.json"
 fi
-for file in legacy-dates.json private-ad-settings.json legacy-comments.json; do
-    if [ -f "$seed/$file" ]; then cp "$seed/$file" "$stage/$file"; fi
-done
-if [ -f "$stage/legacy-comments.json" ]; then
-    python3 "$stage/app/scripts/import-comments.py" "$stage/legacy-comments.json" --database "$stage/data/gallery.sqlite"
-fi
 export PATH=/opt/rendergallery-node/bin:/usr/local/bin:/usr/bin:/bin
 export RENDERGALLERY_DATA_DIR="$stage/data" APP_ORIGIN="https://$host" ADSENSE_ENABLED=false NEXT_TELEMETRY_DISABLED=1
 cd "$stage/app"

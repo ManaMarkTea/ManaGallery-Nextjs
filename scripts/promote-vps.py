@@ -32,7 +32,7 @@ def unpack(stream, destination, max_bytes):
     with tarfile.open(fileobj=stream, mode='r|') as archive:
         for member in archive:
             name = PurePosixPath(member.name)
-            allowed = (name.parts and name.parts[0] == 'app') or name.as_posix() in ('data','legacy-comments.json','legacy-dates.json','private-ad-settings.json') or name.as_posix().startswith('data/models/') or name.as_posix() == 'data/models'
+            allowed = (name.parts and name.parts[0] == 'app') or name.as_posix() in ('data',) or name.as_posix().startswith('data/models/') or name.as_posix() == 'data/models'
             if name.is_absolute() or '..' in name.parts or not allowed or not (member.isfile() or member.isdir()):
                 raise ValueError('Unsafe deployment archive member')
             target = destination.joinpath(*name.parts)
@@ -57,7 +57,7 @@ def pack(stage, reuse_archive=False):
     # Runs as the SSH user: even malicious source links cannot read root secrets.
     stage = Path(stage).resolve(strict=True)
     if not (stage / 'app/.next/BUILD_ID').is_file(): raise ValueError('No completed build')
-    paths = ['app'] + [p for p in ('data/models','legacy-comments.json','legacy-dates.json','private-ad-settings.json') if (stage / p).exists()]
+    paths = ['app'] + [p for p in ('data/models',) if (stage / p).exists()]
     # Flatten npm .bin links while still unprivileged; root extraction rejects links.
     excludes = ['--exclude=app/public/gallery','--exclude=app/public/full'] if reuse_archive else []
     os.execv('/usr/bin/tar', ['tar','--dereference','--hard-dereference',*excludes,'-C',str(stage),'-cf','-',*paths])
@@ -95,18 +95,7 @@ def migrate(work):
     # Deliberately unprivileged. No SQL or Python from Git ever executes as root.
     with closing(sqlite3.connect(DATA / 'gallery.sqlite', timeout=30)) as db, db:
         db.executescript((work / 'app/lib/member-schema.sql').read_text())
-        dates = work / 'legacy-dates.json'
-        if dates.exists():
-            for row in json.loads(dates.read_text()):
-                if db.execute('SELECT 1 FROM legacy_accounts WHERE legacy_id=?',(row['id'],)).fetchone():
-                    db.execute('INSERT INTO legacy_account_dates(legacy_id,joined,last_visit) VALUES(?,?,?) ON CONFLICT(legacy_id) DO UPDATE SET joined=excluded.joined,last_visit=excluded.last_visit',(row['id'],row['joined'],row['lastVisit']))
-        settings = work / 'private-ad-settings.json'
-        if settings.exists():
-            for key,value in json.loads(settings.read_text()).items():
-                if key in ('adsensePublisher','adsenseSlot'):
-                    db.execute('INSERT INTO site_settings(key,value) VALUES(?,?) ON CONFLICT(key) DO NOTHING',(key,value))
-    if (work / 'legacy-comments.json').exists():
-        subprocess.run(['/usr/bin/python3',str(work / 'app/scripts/import-comments.py'),str(work / 'legacy-comments.json'),'--database',str(DATA / 'gallery.sqlite')],check=True)
+
 
 
 def permissions(work):
