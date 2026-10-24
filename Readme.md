@@ -1,3 +1,14 @@
+# ManaGallery Next.js (archived)
+
+This was the original Next.js version of ManaGallery. It is no longer maintained.
+The current PHP version is at [ManaGallery](https://github.com/ManaMarkTea/ManaGallery).
+
+The code and its history are kept here for reference. The instructions below
+describe the archived version. No artwork, accounts or deployment credentials
+are included.
+
+---
+
 # ManaGallery - Next.js
 
 Start with [the installation guide](../docs/getting-started.md). No migration or existing gallery is required.
